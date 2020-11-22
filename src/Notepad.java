@@ -1,256 +1,200 @@
+  import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.*;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import java.util.logging.Logger;
+import javax.swing.*;
 
+/**
+ * <h1>A basic standalone text editor programme.</h1>
+ */
 public class Notepad extends JFrame{
-	
-	private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem1;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem2;
 
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem3;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem4;
-    private javax.swing.JCheckBoxMenuItem jCheckBoxMenuItem5;
-    private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
-    private javax.swing.JMenu jMenu4;
-    private javax.swing.JMenu jMenu5;
-    private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextArea jTextArea1;
-	
-	public Notepad() {
-        initComponents();
+	//#region UI Elements
+	private JCheckBoxMenuItem menuItemNew = new JCheckBoxMenuItem("New", true);
+    private JCheckBoxMenuItem menuItemOpen = new JCheckBoxMenuItem("Open", true);
+    private JCheckBoxMenuItem menuItemPrint = new JCheckBoxMenuItem("Print", true);
+    private JCheckBoxMenuItem menuItemSave = new JCheckBoxMenuItem("Save", true);
+    private JCheckBoxMenuItem menuItemSaveAs = new JCheckBoxMenuItem("Save As", true);
+
+
+	private JMenuBar jMenuBar = new JMenuBar();
+    private JMenu menuFile = new JMenu("File");
+    private JMenu menuEdit = new JMenu("Edit");
+    private JMenu menuView = new JMenu("View");
+    private JMenu menuFormat = new JMenu("Format");
+    private JMenu menuHelp = new JMenu("Help");
+
+
+    private JMenuItem menuItemCopy = new JMenuItem("Copy");
+    private JMenuItem menuItemCut = new JMenuItem("Cut");
+    private JMenuItem menuItemPaste = new JMenuItem("Paste");
+    private JMenuItem menuItemSelectAll = new JMenuItem("Select All");
+
+
+	/**
+	 * Main text editing area.
+	 */
+	private JTextArea txtArea = new JTextArea();
+
+	/**
+	 * Scroll pane parent for the text editing area.
+	 */
+	private JScrollPane txtAreaScrollPane = new JScrollPane();
+	//#endregion UI Elements
+
+	//#region construction
+
+	/*
+	 * Simplified constructor.
+	 * <br><br>
+	 * Sets exit on close, configures and populates window, then displays it.
+	 */
+	{
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		initComponents();
+		setVisible(true);
     }
-	
-	 private void initComponents() {
 
-	        jScrollPane1 = new javax.swing.JScrollPane();
-	        jTextArea1 = new javax.swing.JTextArea();
-	        jMenuBar1 = new javax.swing.JMenuBar();
-	        jMenu1 = new javax.swing.JMenu();
-	        jCheckBoxMenuItem1 = new javax.swing.JCheckBoxMenuItem();
-	        jCheckBoxMenuItem2 = new javax.swing.JCheckBoxMenuItem();
+	/**
+	 * <h2>Configures swing window components</h2>
+	 */
+	private void initComponents() {
+			// Configure text area
+	        txtArea.setColumns(20);
+	        txtArea.setRows(5);
+	        txtAreaScrollPane.setViewportView(txtArea);
 
-	        jCheckBoxMenuItem4 = new javax.swing.JCheckBoxMenuItem();
-	        jCheckBoxMenuItem5 = new javax.swing.JCheckBoxMenuItem();
-	        jCheckBoxMenuItem3 = new javax.swing.JCheckBoxMenuItem();
-	        jMenu2 = new javax.swing.JMenu();
-	        jMenuItem2 = new javax.swing.JMenuItem();
-	        jMenuItem1 = new javax.swing.JMenuItem();
-	        jMenuItem3 = new javax.swing.JMenuItem();
-	        jMenuItem4 = new javax.swing.JMenuItem();
-	        jMenu3 = new javax.swing.JMenu();
-	        jMenu4 = new javax.swing.JMenu();
-	        jMenu5 = new javax.swing.JMenu();
+	        // Add action listeners
+			menuItemOpen.addActionListener(this::openFile);
+	        menuItemSave.addActionListener(this::saveFile);
 
-	        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+			menuItemCut.addActionListener(this::cut);
+			menuItemCopy.addActionListener(this::copy);
+			menuItemSelectAll.addActionListener(this::selectAll);
+			menuItemPaste.addActionListener(this::paste);
 
-	        jTextArea1.setColumns(20);
-	        jTextArea1.setRows(5);
-	        jScrollPane1.setViewportView(jTextArea1);
+			// Populate menu file
+			menuFile.add(menuItemNew);
+			menuFile.add(menuItemOpen);
+			menuFile.add(menuItemSave);
+			menuFile.add(menuItemSaveAs);
+	        menuFile.add(menuItemPrint);
 
-	        jMenu1.setText("File");
-	        jMenu1.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jMenu1ActionPerformed(evt);
-	            }
-	        });
+	        // Populate edit menu
+	        menuEdit.add(menuItemCut);
+			menuEdit.add(menuItemCopy);
+			menuEdit.add(menuItemPaste);
+			menuEdit.add(menuItemSelectAll);
 
-	        jCheckBoxMenuItem1.setSelected(true);
-	        jCheckBoxMenuItem1.setText("New");
-	        jMenu1.add(jCheckBoxMenuItem1);
+			// Add menus to menu bar
+			jMenuBar.add(menuFile);
+	        jMenuBar.add(menuEdit);
+	        jMenuBar.add(menuView);
+	        jMenuBar.add(menuFormat);
+	        jMenuBar.add(menuHelp);
 
-	        jCheckBoxMenuItem2.setSelected(true);
-	        jCheckBoxMenuItem2.setText("Open");
-	        jCheckBoxMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jCheckBoxMenuItem2ActionPerformed(evt);
-	            }
-	        });
-	        jMenu1.add(jCheckBoxMenuItem2);
+	        // Add menu bar to super
+	        setJMenuBar(jMenuBar);
 
-	        jCheckBoxMenuItem4.setSelected(true);
-	        jCheckBoxMenuItem4.setText("Save");
-	        jCheckBoxMenuItem4.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jCheckBoxMenuItem4ActionPerformed(evt);
-	            }
-	        });
-	        jMenu1.add(jCheckBoxMenuItem4);
+			// Configure layout
+	        getContentPane().setLayout(new GroupLayout(getContentPane()));
+	        GroupLayout layout = (GroupLayout) getContentPane().getLayout();
 
-	        jCheckBoxMenuItem5.setSelected(true);
-	        jCheckBoxMenuItem5.setText("Save As");
-	        jMenu1.add(jCheckBoxMenuItem5);
-
-	        jCheckBoxMenuItem3.setSelected(true);
-	        jCheckBoxMenuItem3.setText("Print");
-	        jMenu1.add(jCheckBoxMenuItem3);
-
-	        jMenuBar1.add(jMenu1);
-
-	        jMenu2.setText("Edit");
-
-	        jMenuItem2.setText("Cut");
-	        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jMenuItem2ActionPerformed(evt);
-	            }
-	        });
-	        jMenu2.add(jMenuItem2);
-
-	        jMenuItem1.setText("Copy");
-	        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jMenuItem1ActionPerformed(evt);
-	            }
-	        });
-	        jMenu2.add(jMenuItem1);
-
-	        jMenuItem3.setText("Paste");
-	        jMenuItem3.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jMenuItem3ActionPerformed(evt);
-	            }
-	        });
-	        jMenu2.add(jMenuItem3);
-
-	        jMenuItem4.setText("Select All");
-	        jMenuItem4.addActionListener(new java.awt.event.ActionListener() {
-	            public void actionPerformed(java.awt.event.ActionEvent evt) {
-	                jMenuItem4ActionPerformed(evt);
-	            }
-	        });
-	        jMenu2.add(jMenuItem4);
-
-	        jMenuBar1.add(jMenu2);
-
-	        jMenu3.setText("View");
-	        jMenuBar1.add(jMenu3);
-
-	        jMenu4.setText("Format");
-	        jMenuBar1.add(jMenu4);
-
-	        jMenu5.setText("Help");
-	        jMenuBar1.add(jMenu5);
-
-	        setJMenuBar(jMenuBar1);
-
-	        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-	        getContentPane().setLayout(layout);
-	        layout.setHorizontalGroup(
-	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-	            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1102, Short.MAX_VALUE)
+			layout.setHorizontalGroup(
+	            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+	            .addComponent(txtAreaScrollPane, GroupLayout.DEFAULT_SIZE, 1102, Short.MAX_VALUE)
 	        );
+
 	        layout.setVerticalGroup(
-	            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+	            layout.createParallelGroup(GroupLayout.Alignment.LEADING)
 	            .addGroup(layout.createSequentialGroup()
-	                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 581, javax.swing.GroupLayout.PREFERRED_SIZE)
+	                .addComponent(txtAreaScrollPane, GroupLayout.PREFERRED_SIZE, 581, GroupLayout.PREFERRED_SIZE)
 	                .addGap(0, 0, Short.MAX_VALUE))
 	        );
 
 	        pack();
 	    }                      
+	//#endregion construction
 
-	    private void jMenu1ActionPerformed(java.awt.event.ActionEvent evt) {                                      
-	        // TODO add your handling code here:
-	        jTextArea1.setText("");
-	    }                                     
+	/**
+	 * Prompts the user to load a file to {@link Notepad#txtArea}
+	 */
+	private void openFile(java.awt.event.ActionEvent evt) {
 
-	    private void jCheckBoxMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {                                                  
-	          try
-	        { 
-	        JFileChooser jf = new JFileChooser();
-	        jf.showSaveDialog(this);
-	        File f =  new File(jf.getSelectedFile().toString());
-	        FileReader fw = new FileReader(f);
-	        BufferedReader bw = new BufferedReader(fw);
-	        String s="";
-	        String s1="";
-	        while((s1=bw.readLine())!=null)
-	        {
-	            s+=s1;
-	        }
-	        jTextArea1.setText(s);
-	        bw.close();
-	       
-	        }
-	        catch(Exception ex)
-	        {
-	           
-	        }
+		try {
+																		// TODO File chooser can be abstracted
+	        final JFileChooser jf = new JFileChooser();					// Create a file chooser. FINAL: We only need to do this once.
+	        jf.showSaveDialog(this);								// Prompt user for save location
+
+
+			File f =  new File(jf.getSelectedFile().toString());		// Get file location
+
+	        FileReader fw = new FileReader(f);							// Create a read buffer
+			BufferedReader br = new BufferedReader(fw);
+
+	        StringBuilder content = new StringBuilder();				// local store for the file's content.
+	        String line;												// local store for the current line of the file.
+
+	        while((line=br.readLine())!=null)							// For every line, read it and
+	            content.append(line);									// append it to the local content
+
+			br.close();													// close the buffer
+			fw.close();												    // close the reader
+	        txtArea.setText(content.toString());						// place read data into the editing field
+
+		}
+		catch(Exception ignored){} 										// TODO User is not alerted to any failure.
+	}
+
+	/**
+	 * Prompts the user to save the text found in {@link Notepad#txtArea} to a file.
+	 */
+	private void saveFile(ActionEvent evt) {
+		try {
+			final JFileChooser jf = new JFileChooser();					// TODO File chooser can be abstracted. FINAL: we only need to create this once.
+	        jf.showSaveDialog(this);								// prompt the user for a file,
+	        File f =  new File(jf.getSelectedFile().toString());		// Create a local file for the desired location. TODO check for existing files and *.txt file extension
+	        FileWriter fw = new FileWriter(f);							// Open a writer
+	        BufferedWriter bw = new BufferedWriter(fw);					// Create a write buffer
+	        bw.write(txtArea.getText());								// Dump the text editor field to the file
+	        bw.close();													// close the writer
+			fw.close();													// close the file writer
+		}
+	    catch(Exception ignored){} 									// TODO User is not alerted to failure.
 	    }                                                 
 
-	    private void jCheckBoxMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {                                                  
-	        try
-	        { 
-	        JFileChooser jf = new JFileChooser();
-	        jf.showSaveDialog(this);
-	        File f =  new File(jf.getSelectedFile().toString());
-	        FileWriter fw = new FileWriter(f);
-	        BufferedWriter bw = new BufferedWriter(fw);
-	        bw.write(jTextArea1.getText());
-	        bw.close();
-	       
-	        }
-	        catch(Exception ex)
-	        {
-	           
-	        }
-	    }                                                 
+	//#region Edit Actions
+	private void cut(ActionEvent evt) {
+		txtArea.cut();
+	}
 
-	    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-	        // TODO add your handling code here:
-	        jTextArea1.cut();
-	    }                                         
+	private void copy(ActionEvent evt) {
+		txtArea.copy();
+	}
 
-	    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-	        // TODO add your handling code here:
-	        jTextArea1.copy();
-	    }                                         
+	private void paste(java.awt.event.ActionEvent evt) {
+		txtArea.paste();
+	}
 
-	    private void jMenuItem3ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-	        // TODO add your handling code here:
-	        jTextArea1.paste();
-	    }                                         
+	private void selectAll(java.awt.event.ActionEvent evt) {
+		txtArea.selectAll();
+	}
+	//#endregion Edit Actions
 
-	    private void jMenuItem4ActionPerformed(java.awt.event.ActionEvent evt) {                                          
-	        // TODO add your handling code here:
-	        jTextArea1.selectAll();
-	    }                                          
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		
 		 try {
-	            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+	            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
 	                if ("Nimbus".equals(info.getName())) {
-	                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+	                    UIManager.setLookAndFeel(info.getClassName());
 	                    break;
 	                }
 	            }
-	        } catch (ClassNotFoundException ex) {
-	            java.util.logging.Logger.getLogger(Notepad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-	        } catch (InstantiationException ex) {
-	            java.util.logging.Logger.getLogger(Notepad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-	        } catch (IllegalAccessException ex) {
-	            java.util.logging.Logger.getLogger(Notepad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-	        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
+	        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+	            Logger.getLogger(Notepad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+	        } // FIXME invokes logger, but provides no message.
+			  // TODO logging may be abstracted.
 
-	            java.util.logging.Logger.getLogger(Notepad.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-	        }
-	        
-	        java.awt.EventQueue.invokeLater(new Runnable() {
-	            public void run() {
-	                new Notepad().setVisible(true);
-	            }
-	        });
-
-
+		new Notepad();
 	}
-
 }
